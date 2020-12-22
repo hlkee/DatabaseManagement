@@ -1,0 +1,29 @@
+Group 28:
+Emilie Rajka erajka@wisc.edu
+Jacqueline McNutt jmcnutt@wisc.edu
+Hock Lee kee3@wisc.edu
+
+Outline
+
+Please find our extra test cases in main.cpp named test<number>() where number is 4 through 8. 
+Test 4 sees how our code reacts to building an empty tree
+Test 5 checks how our code can handle a larger number of entries in the forward direction
+Test 6 checks how our code can handle a larger number of entries in a random order
+Test 7 checks how our code handles inserts of negative numbers in the backward order
+Test 8 checks how our code handles inserts of negative numbers in the forward order.
+Each will print out in the same fashion as the first 3 test cases.
+
+To make these tests we created the following methods:
+void createRelationForward(int size);
+void createRelationForwardNegative(int negNum);
+void createRelationBackward(int size);
+void createRelationBackwardNegative(int negNum);
+void createRelationRandom(int size);
+
+These follow the same patterns as the built in methods but take in either a size or a negative number to use for choosing what the entries will be.
+
+We also utilized printLevel, printTree, and height to ensure our tree structure is correct, 
+however we are aware that this method does not correctly unpin pages. This was not fixed because it was 
+for testing purposes only and does not affect the implementation of the btree when print is not called.
+
+Please find our design decisions in design.txt.
