@@ -1,0 +1,297 @@
+<?xml version="1.0"?>
+<pset>
+
+    <!--
+        CS 564, FALL 2020
+        PROBLEM SET 1 SUBMISSION TEMPLATE
+
+        Please copy and paste your SQL queries into the appropriate spots below. 
+
+        When submitting SQL queries, please do not include the initial 
+        %sql or %%sql IPython commands. Just include the SQL code.
+
+        DO NOT DELETE THE <![CDATA[ ... ]]> LINES IN EACH <answer> TAG!
+        Doing so will break the autograder. To avoid accidentally breaking
+        something, please leave all existing comments in this template
+        intact in your submission.
+    -->
+
+    <student>
+        <name>
+            <!-- Insert your full name on the line below. -->
+		Hock Lye Kee
+            
+        </name>
+        <netid>
+            <!-- Insert your NetID (NOT your student ID number!) below. -->
+		Kee3
+        </netid>
+        <studentid>
+            <!-- Insert your student ID number below. -->
+		9080308456
+        </studentid>
+    </student>
+
+
+    <!-- BEGIN PROBLEM 1 -->
+    <answer number="1a">
+        <!-- Paste your solution to problem 1, part (a) below this line. --><![CDATA[
+		SELECT j AS "i", i AS "j" , val
+		FROM A
+		ORDER BY i ASC;
+        ]]><!-- End problem 1, part (a). -->
+    </answer>
+    <answer number="1b">
+        <!-- Paste your solution to problem 1, part (b) below this line. --><![CDATA[
+		SELECT SUM(A.val * B.val)
+		FROM A,B
+		WHERE A.j = 2 AND B.j = 1 AND A.i = B.i;
+        ]]><!-- End problem 1, part (b). -->
+    </answer>
+    <answer number="1c">
+        <!-- Paste your solution to problem 1, part (c) below this line. --><![CDATA[
+		SELECT A.i, B.j, SUM(A.val * B.val) AS val
+		FROM A,B
+		WHERE A.j = B.i
+		GROUP BY A.i, B.j;
+        ]]><!-- End problem 1, part (c). -->
+    </answer>
+    <answer number="1d">
+        <!-- Paste your solution to problem 1, part (d) below this line. --><![CDATA[
+		SELECT "i3" AS i, j , SUM(val * val3) AS val
+		FROM A, (
+ 		   SELECT i2 AS "i3" , j AS "j2", SUM(val * val2) AS val3
+ 		   FROM(
+    		    SELECT * 
+    		    FROM A, (SELECT i AS "i2", j AS "j2" , val AS "val2" FROM A)
+   		 )
+   		 WHERE i = j2
+    		GROUP BY i2,j
+		)
+		WHERE i = j2
+		GROUP BY i3, j;
+
+
+        ]]><!-- End problem 1, part (d). -->
+    </answer>
+    <!-- END PROBLEM 1 -->
+
+
+    <!-- BEGIN PROBLEM 2 -->
+    <answer number="2a">
+        <!-- Paste your solution to problem 2, part (a) below this line. --><![CDATA[
+
+	WITH Examples AS(
+	SELECT Store, SUM(WeeklySales) AS AllSales FROM Sales
+	WHERE Sales.WeekDate IN
+	    (SELECT WeekDate
+	     FROM Holidays
+	     WHERE isHoliday = "TRUE")
+	GROUP BY STORE ORDER BY AllSales DESC
+	)
+
+	SELECT Store, MAX(AllSales) AS AllSales FROM Examples
+	UNION
+	SELECT Store, MIN(AllSales) AS AllSales FROM Examples;
+
+
+        ]]><!-- End problem 2, part (a). -->
+    </answer>
+    <answer number="2b">
+        <!-- Paste your solution to problem 2, part (b) below this line. --><![CDATA[
+SELECT COUNT(*) AS "NumNonHolidays" 
+FROM(
+    SELECT WeekDate 
+    FROM Sales
+    WHERE WeekDate IN
+        (SELECT WeekDate 
+        FROM Holidays
+        WHERE isHoliday = "FALSE")
+    GROUP BY WeekDate
+    HAVING (
+        SUM(WeeklySales) > (
+            SELECT AVG(S) FROM(
+            SELECT WeekDate, SUM(WeeklySales) AS S
+            FROM Sales
+            WHERE WeekDate IN
+                (SELECT WeekDate
+                FROM Holidays
+                WHERE isHoliday = "TRUE")
+            GROUP BY WeekDate
+            )
+        )
+    )
+);
+
+        ]]><!-- End problem 2, part (b). -->
+    </answer>
+    <answer number="2c">
+        <!-- Paste your solution to problem 2, part (c) below this line. --><![CDATA[
+SELECT Type, SUM(WeeklySales) AS TotalSales
+FROM Stores, Sales
+WHERE Stores.Store = Sales.Store
+AND
+Sales.Weekdate IN
+    (SELECT DISTINCT(Weekdate)
+    FROM Sales
+    WHERE Weekdate LIKE "%-06-%" OR Weekdate LIKE "%-07-%" OR Weekdate LIKE "%-08-%")
+GROUP BY Type
+
+
+        ]]><!-- End problem 2, part (c). -->
+    </answer>
+    <answer number="2d">
+        <!-- Paste your solution to problem 2, part (d) below this line. --><![CDATA[
+DROP TABLE IF EXISTS PartD;
+CREATE TABLE PartD(
+    AttributeName VARCHAR(20),
+    CorrelationSign Integer
+);
+    
+WITH exy AS (
+SELECT 
+    SUM(t.temperature * s.WeeklySales) AS exyTemp,
+    SUM(t.fuelprice * s.WeeklySales) AS exyFuel,
+    SUM(t.cpi * s.WeeklySales) AS exyCpi,
+    SUM(t.unemploymentrate * s.WeeklySales) AS exyUnemployment
+FROM (SELECT DISTINCT * FROM Sales) AS s, (SELECT DISTINCT * FROM TemporalData) AS t
+WHERE t.weekDate = s.weekDate
+AND t.store = s.store
+),
+
+exey AS(
+SELECT 
+    SUM(s.WeeklySales) * AVG(t.temperature) AS exeyTemp,
+    SUM(s.WeeklySales) * AVG(t.fuelprice)/ COUNT(DISTINCT WeeklySales) AS exeyFuel,
+    SUM(s.WeeklySales) * AVG(t.cpi) AS exeyCpi,
+    SUM(s.WeeklySales) * AVG(t.unemploymentrate) AS exeyUnemployment
+FROM (SELECT DISTINCT * FROM Sales) AS s, (SELECT DISTINCT * FROM TemporalData) AS t
+WHERE t.weekDate = s.weekDate
+AND t.store = s.store
+),
+
+final AS(
+    SELECT 
+    CAST((exyTemp - exeyTemp) / ABS(exyTemp - exeyTemp) AS INT) AS Temp,
+    CAST((exyFuel - exeyFuel) / ABS(exyFuel - exeyFuel) AS INT) AS Fuel,
+    CAST((exyCpi - exeyCpi) / ABS(exyCpi - exeyCpi) AS INT) AS theCPI,
+    CAST((exyUnemployment - exeyUnemployment)/ ABS(exyUnemployment - exeyUnemployment) AS INT) AS Unemp
+FROM exy, exey
+)
+
+INSERT INTO PartD (CorrelationSign, AttributeName)
+SELECT Unemp, "Unemployment" FROM final
+UNION
+SELECT theCPI, "CPI" FROM final
+UNION
+SELECT Fuel, "FuelPrice" FROM final
+UNION
+SELECT Temp, "Temperature" FROM final;
+SELECT * FROM partD
+
+        ]]><!-- End problem 2, part (d). -->
+    </answer>
+    <!-- END PROBLEM 2 -->
+
+
+    <!-- BEGIN PROBLEM 3 -->
+    <answer number="3a">
+        <!-- Paste your solution to problem 3, part (a) below this line. --><![CDATA[
+    SELECT B, d AS distance
+    FROM Streets
+    WHERE A = "UW-Madison"
+    AND distance <=  10
+    UNION
+    SELECT 
+        Street2.B AS B,
+        Street1.d + Street2.d AS distance 
+    FROM Streets Street1, Streets Street2
+    WHERE Street1.B = Street2.A
+    AND Street1.A <> Street2.B
+    AND Street1.A = "UW-Madison"
+    AND distance <=  10
+    UNION
+    SELECT
+        Street3.B AS B,
+        Street1.d + Street2.d + Street3.d AS distance
+    FROM Streets Street1, Streets Street2, Streets Street3
+    WHERE
+        Street1.B = Street2.A
+        AND
+        Street2.B = Street3.A
+        AND 
+        Street1.A <> Street3.B
+        AND Street1.A = "UW-Madison"
+        AND distance <=  10
+
+
+        ]]><!-- End problem 3, part (a). -->
+    </answer>
+    <answer number="3b">
+        <!-- Paste your solution to problem 3, part (b) below this line. --><![CDATA[
+DROP VIEW IF EXISTS theStreet;
+CREATE VIEW theStreet AS
+    SELECT A, B, d AS distance
+    FROM Streets
+    UNION
+    SELECT 
+        Street1.A AS A,
+        Street2.B AS B,
+        Street1.d + Street2.d AS distance 
+    FROM Streets Street1, Streets Street2
+    WHERE Street1.B = Street2.A
+    UNION
+    SELECT
+        Street1.A AS A,
+        Street3.B AS B,
+        Street1.d + Street2.d + Street3.d AS distance
+    FROM Streets Street1, Streets Street2, Streets Street3
+    WHERE
+        Street1.B = Street2.A
+        AND
+        Street2.B = Street3.A
+        AND 
+        Street1.A <> Street3.B;
+        
+SELECT theStreet1.A AS company_1, theStreet2.B AS company_2, (theStreet1.distance + theStreet2.distance) AS distance
+FROM theStreet theStreet1, theStreet theStreet2
+WHERE theStreet1.distance + theStreet2.distance <= 15
+AND theStreet1.B = "UW-Madison" AND theStreet2.A = "UW-Madison" AND theStreet1.A <> theStreet2.B
+
+
+        ]]><!-- End problem 3, part (b). -->
+    </answer>
+    <answer number="3c">
+        <!-- Paste your solution to problem 3, part (c) below this line. --><![CDATA[
+
+DELETE
+FROM Streets 
+WHERE Streets.id IN
+    (SELECT street1.id FROM 
+    Streets street1, Streets street2, Streets street3
+    WHERE street1.A = street3.B AND street2.A = street1.B AND street3.A = street2.B
+     AND (street1.d  < 3)
+    )
+
+
+        ]]><!-- End problem 3, part (c). -->
+    </answer>
+    <answer number="3d">
+        <!-- Paste your solution to problem 3, part (d) below this line. --><![CDATA[
+WITH RECURSIVE 
+    longestD (prev, A, B, distance) AS (
+        SELECT A, A, B, d FROM Streets
+        UNION ALL
+        SELECT Streets.A, longestD.A , Streets.B, Streets.d + longestD.distance
+        FROM Streets , longestD
+        WHERE LongestD.A <> Streets.B AND longestD.prev <> Streets.B AND longestD.B = Streets.A
+    )
+SELECT A, B, MAX(distance) FROM longestD
+
+
+        ]]><!-- End problem 3, part (d). -->
+    </answer>
+    <!-- END PROBLEM 3 -->
+
+
+</pset>
