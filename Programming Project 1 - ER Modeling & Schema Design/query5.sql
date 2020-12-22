@@ -1,0 +1,1 @@
+SELECT COUNT(DISTINCT Seller.userID) FROM  (SELECT userID, rating FROM User,Item WHERE User.userID = Item.sellerID) AS Seller WHERE Seller.rating > 1000;

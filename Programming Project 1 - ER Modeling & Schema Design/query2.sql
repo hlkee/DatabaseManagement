@@ -1,0 +1,1 @@
+SELECT COUNT(DISTINCT Item.sellerID ) FROM User, Item WHERE Item.sellerID = User.userID AND Item.location = "New York";

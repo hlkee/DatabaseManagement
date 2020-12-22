@@ -1,0 +1,1 @@
+SELECT COUNT(DISTINCT C.catName) FROM (SELECT * FROM Item WHERE currentBid > 100 AND numBids <> 0) AS I, Cat_Items AS C WHERE I.itemID = C.itemID;

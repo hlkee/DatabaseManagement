@@ -1,0 +1,10 @@
+.separator |
+.import bids.dat Bids
+.import bidder.dat Bidder
+update Bidder set location = null where location = 'null';
+update Bidder set country = null where country = 'null';
+update Bidder set userID = null where userID = 'null';
+.import category.dat Category
+.import user.dat User
+.import itemTable.dat Item
+.import catItems.dat Cat_Items

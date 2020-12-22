@@ -1,0 +1,1 @@
+SELECT COUNT(DISTINCT U.sellerID) FROM (SELECT sellerID FROM Item) AS U, (SELECT userID FROM Bidder) AS B WHERE U.sellerID = B.userID;
